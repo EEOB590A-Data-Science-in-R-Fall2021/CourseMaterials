@@ -1,4 +1,4 @@
-#Intro to R Week 2
+#Intro to R Part 2
 
 #4. Reading in Data 
 library(readr) #part of the tidyverse set of packages
