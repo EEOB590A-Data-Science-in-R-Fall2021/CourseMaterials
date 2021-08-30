@@ -1,38 +1,106 @@
-#Intro to R Part 2
+# EEOB590A Fall 2021
+# Intro to R - Part 2
 
-#4. Reading in Data 
-library(readr) #part of the tidyverse set of packages
-library(readxl) #not automatically loaded with tidyverse, needs to be loaded separately
+######## Topics #######
+# 1. Preparing and loading data files into R
+# 2. Getting to know your data
+# 3. Tibbles
+# 4. Using $ and square brackets
+# 5. Manipulating parts of data tables
 
-spider <- read.csv("1. Intro to R/data/spider.csv", header = TRUE) #base approach to loading csv's
+# ----- 1. Preparing and loading data files into R ------
+
+#   Can use .csv or .txt files or excel files
+
+# Read file using read.csv, naming it something. Note that this must be in your 
+# working directory
+
+spider <- read.csv("1. Intro to R/data/spider.csv", header = TRUE)
+
+# You can also use use file.choose()
+spider <- read.csv(file.choose())
+
+#can also use the tidyverse approach to load CSV files
+library(readr) 
 spidertv <- read_csv("1. Intro to R/data/spider.csv") #readr approach to loading csv's
 
 #what are the differences? 
 str(spider)
 str(spidertv)
 
-#if you want to specific class, use col_types argument and tell R which column types you want
-spidertv2 <- read_csv("1. Intro to R/data/spider.csv", col_types = "iDffnffnnnnn") #readr approach to loading csv's 
-
-#Can also add column names in here too
-spidertv3 <- read_csv("1. Intro to R/data/spider.csv", col_names = c("year", "date", "season", "island", "birddensity", "birdpres", "site", "surveynum", "totalwebs", "time", "length", "webs10m"), skip=1) #note that when you use col_names, the first row of data is read in as data, so need to use skip=1 to skip the header row
-
-#If you want to read certain things in as "NA", use na= argument
-spidertv4 <- read_csv("1. Intro to R/data/spider.csv", na = c("na", "NA", ""))
-
-# Reading in excel files is easy too, with readxl package
+# Reading in excel files is easy too, with readxl package. 
 library(readxl)
 
-#Can read in the second sheet by writing "sheet = 2"
+#Use 'sheet = (fill in number)" to get the second or third sheet or whatever sheet number you want
+
 spiderprey <- read_excel("1. Intro to R/data/Prey_Capture_Final_Do_Not_Touch.xlsx", sheet = 2)
 
-#how does this compare to the csv files we read in earlier? (note - it's a different dataset)
-str(spiderprey)
+## Your Turn ##
 
-#Can specify col_names, col_types, na the same way as in read_csv()
+# 1) Read in the first sheet of the Prey_Capture_Final excel file. Name it something appropriate for the content. 
+
+# 2) Use the Import Dataset tool to bring in the dataset and change the classes of columns to something else (e.g. date, character etc.). Then look at the code that ran in the console below. 
 
 
-#5. Tibbles
+# ----- 2. Getting to know your data ------
+
+# What type of object does R interpret the spider file as? use class()
+
+class(spider)
+
+# Good! R interprets it as a data frame
+
+# Look at the dimensions - rows by cols
+
+dim(spider)
+
+# Look at the first rows with head()
+
+head(spider)
+
+# What are the column names? Row names? 
+
+colnames(spider)
+rownames(spider)
+
+# How are the rows, columns labeled?
+
+labels(spider)
+
+# Summarize your data
+
+summary(spider)
+
+# R describes data as numerical, factors, and integers
+# Use str(data) to see what it is describing your data
+
+str(spider)
+
+# Change class using as.factor(), as.numeric(), as.integer(), as.character()
+
+spider$survey <- as.factor(spider$survey)
+
+str(spider)
+
+
+## YOUR TURN ## 
+
+#Using the Spider Prey dataset, do the following: 
+
+#1) Find out what R interprets this object as. 
+
+#2) Determine the dimensions of the dataframe.
+
+#3) Look at the head of the dataset. How many rows does that show?
+
+#4) Look at the column names and row names - are they logical? 
+
+#5) Look at the summary & the structure of your dataframe. 
+
+#6) change the site from a character to a factor class. 
+
+
+#---------3. Tibbles ---------#
 str(spider) #created using base read.csv - is a data frame
 str(spidertv) #created using read_csv in tidyverse, is a tibble
 
@@ -52,45 +120,50 @@ str(spider_tb) #note that it kept all of the classes from the dataframe
 spidertv_df <- as.data.frame(spidertv)
 str(spidertv_df)
 
-#6. Explore your data
-dim(spider)
-nrow(spider)
-ncol(spider)
-length(spider) #same as ncol if talking about entire dataframe
+
+# ----- 4. Using $ and square brackets ------
+
+# To describe cells in your data frame,
+#   R uses the form data[i,j]
+#   where i is row, j is column
+#   Or, data$column to describe columns
+
+# Specific cells
+spider[2,5]
+
+# Specific row
+spider[2,]
+
+# Specific column
+spider[,5]
+
+# OR, data$column
+
+spider$island
+
+
+## YOUR TURN ### 
+
+#With the spiderprey dataset, answer the following: 
+
+#1) What is the name of the web in the 12th row of data? 
+
+#2) Pull out all of the values in the totalprey column using 3 different approaches. 
+
+
+# ----- 5. Manipulating parts of data frames ------
+
+# Create a vector by calculating
+# This isnt automatically attached to the "spider" data frame
+webs50m <- (spider$tot_webs/spider$length)*50
+
+# To attach, use cbind() 
+spider <- cbind(spider,webs50m)
+
+# Make sure the new column is there
 head(spider)
-tail(spider)
-colnames(spider)
-rownames(spider)
-str(spider)
-summary(spider)
 
-#7. Change class of data
-spider$site <- as.character(spider$site)
-levels(spider$site)
-head(spider$site)
+## YOUR TURN ###
+#using the spiderprey dataset...
 
-spider$site <- as.factor(spider$site)
-levels(spider$site)
-head(spider$site)
-
-spider$site <- as.numeric(spider$site)
-levels(spider$site)
-head(spider$site)
-
-#other functions
-as.integer()
-as.logical()
-
-#dealing with dates
-library(lubridate)
-str(spidertv) #date is a character class in this tibble
-
-spidertv$date2 <- dmy(as.character(spidertv$date)) #but doesn't work for the ones that aren't dmy format... 
-
-
-
-
-
-
-
-
+#1) Make a new column that sums values from obs1 to obs8. Check to see if this matches the values in totalprey column. 
