@@ -175,3 +175,11 @@ head(spider)
 #using the spiderprey dataset...
 
 #1) Make a new column that sums values from obs1 to obs8. Check to see if this matches the values in totalprey column. 
+str(spiderprey)
+spiderprey$obs2 <- as.numeric(spiderprey$obs2)
+spiderprey$obs3 <- as.numeric(spiderprey$obs3)
+spiderprey$obs4 <- as.numeric(spiderprey$obs4)
+spiderprey$obs5 <- as.numeric(spiderprey$obs5)
+spiderprey$totprey2 <- spiderprey
+
+spiderprey$obs1 + spiderprey$obs3 + spiderprey$obs4 + spiderprey$obs5
