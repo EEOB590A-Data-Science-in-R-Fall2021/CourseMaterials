@@ -1,46 +1,48 @@
-########## R introduction Part 3 (Thursday, September 12) ############
+# EEOB590A Fall 2021
+# Intro to R - Part 3
 
-#Today we will focus on reading in datasets, with some added complexity, and 
-#changing the class of variables
+######## Topics #######
+#1. Practice reading in Excel files, with some added complexity
+#2. Learning about dates
 
-#1) Reading in CSV files
+# This script requires 2 data files: 
+#"leaf damage ag expt.xls"
+#"Exploring_dates.xlsx"
 
-#Read in the "transplant_raw.csv" file
+#Start by loading the libraries you might need (hint, need one for reading in excel files)
 
-#Read it in again, but assign better column names using principles
-#we discussed in class
+#1) Reading in Excel files
 
-#2) Reading in Excel files
+#We are going to work with the "leaf damage ag expt.xls" file. This is the 
+#exact file I found from an undergraduate project in 2007. It's not perfect. 
+#Let's see how we can fix it. 
 
-#Read in the "leaf damage ag expt.xls" file. This is the exact file I found from 
-#an undergraduate project in 2007. It's not perfect. Let's see how we can fix it. 
-
-#read in the "beans" and "herbivory" worksheets and give each the same name 
-#as the worksheet tab they came from
+#1.a - read in the "beans" worksheet and give it the same name as the worksheet tab it came from
 
 # Look at the structure of 'beans'. What class are each of the columns in? 
 
-
 #Read in the beans worksheet again, and tell R the appropriate class/column type 
-#for each column. Note that read_excel doesn't let you choose factor, so use text instead
+#for each column. Note that read_excel doesn't let you choose factor, so use text instead. Give this dataframe a new name so you can compare to earlier "beans" df. 
+
+#Check to make sure the columns are now in the appropriate class/column type
 
 
 #After you read it in, you realize that the "Number" column indicates the ID 
 #of each exclosure, and therefore should be a factor. Change that column to a
-#factor. 
+#factor and then check to make sure it is actually a factor
 
 #check the number of levels for this factor to make sure it converted correctly
 
+#1.b - Herbivory Worksheet
+#read in the "herbivory" worksheet and give it the same name as the worksheet it came from
+
 #Notice that there are some X's in the leaflet columns of the herbivory worksheet?
-#Read it in again, but this time tell R that the X means NA
+#Read it in again, but this time tell R that the X means NA, and give the dataframe a new  name so you can compare. 
+
+#Read the herbivory datasheet in again, but pull in everything but columns L and M because they do not belong with rows 2-6. If you aren't sure how to do this, look at the help file for the function that reads in excel files
 
 
-#ADVANCED: Read the herbivory datasheet in again, but omit columns J-L because
-#they do not belong with rows 2-6. If you aren't sure how to do this, look
-#at the help file for the function that reads in excel files
-
-
-#3) Dealing with dates
+#2) Dealing with dates
 
 #Read in the "Exploring_dates.xlsx" file. 
 
@@ -52,6 +54,5 @@
 #as dates? 
 
 #Create a new column based on the difference in time between date 1 and date 2 
-#and name it "duration
+#and name it "duration" and add it to the "dates" dataframe
 
-#ADVANCED: Change the columns that didn't read in correctly into proper dates

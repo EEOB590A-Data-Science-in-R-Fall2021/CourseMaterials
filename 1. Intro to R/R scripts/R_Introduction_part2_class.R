@@ -8,7 +8,7 @@
 # 2. Getting to know your data
 # 3. Tibbles
 # 4. Using $ and square brackets
-# 5. Manipulating parts of data tables
+# 5. Manipulating parts of data frames
 
 # ----- 1. Preparing and loading data files into R ------
 
