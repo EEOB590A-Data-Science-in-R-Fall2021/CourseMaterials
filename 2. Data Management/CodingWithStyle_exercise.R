@@ -11,7 +11,7 @@ ggplot(df1,aes(state,number.of.cats))+geom_point()
 df1 $ max=10
 #analyze dataset
 library(lme4)
-mod1<-glm(var2~number.of.cats,family=binomial,data=df1)
+mod1<-glm(snow~number.of.cats,family=binomial,data=df1)
 summary(mod1)
 #create a csv file
 write.csv("database1_15September2021.csv")
