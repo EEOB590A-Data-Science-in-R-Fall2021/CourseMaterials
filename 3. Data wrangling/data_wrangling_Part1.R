@@ -48,6 +48,9 @@ transplant %>%
   filter(Island == "Guam") %>%
   summarize(meanwebsize = mean(WebSize.cm.))
 
+#base R approach
+meanguam <- summarize(guamspid[transplant$Island == "Guam",], meanwebsize = mean(WebSize.cm.))
+
 # the code chunk above will translate to something like "you take the transplant data, then you subset the guam data and then you calculate the meanwebsize".
 
 # Here are four reasons why you should be using pipes in R:
@@ -82,19 +85,29 @@ colnames(transplant) #note that I left one with uppercase letters; I will return
 # 3.2: Fix upper case/lower case issues in column names
 #change column names from upper to lowercase
 
-transplant <- transplant %>%
-  rename_all(tolower)
+transplant2 <- transplant %>%
+  rename_with(tolower) #check this
 
 # To see column names, use colnames or names
 colnames(transplant)
 names(transplant)
+
+#check out function clean_names in Janitor package
+transplant2 <- clean_names(transplant) 
 
 # Step 4: Add, remove, split, combine columns ----------
 
 ## 4.1: Add a column ------
 
 ### 4.1.1: Add column directly ------
-transplant$year <- 2013 #this experiment happened in 2013. Added this in a new column, so now have 12 columns/variables. All rows will have the same value for this column. 
+
+transplant <- transplant %>%
+  mutate(year = 2013)
+#this experiment happened in 2013. Added this in a new column, so now have 12 columns/variables. All rows will have the same value for this column. 
+
+# transplant$year <- 2013 #base R approach
+
+
 
 ## 4.2: Remove a column --------
 # use "Select" - to select columns from a dataframe to include or drop (use the - to indicate drop)
@@ -105,7 +118,7 @@ colnames(transplant)
 
 ## 4.3: Separate one column into two columns ------
 transplant <- transplant %>%
-  separate(col=web, into=c("web_a", "web_b"), sep="'", remove = F) 
+  separate(col = web, into = c("web_a", "web_b"), sep = "'", remove = FALSE) 
 # remove=F tells R to leave the original column. So now we have 13 columns/variables
 
 colnames(transplant)
@@ -116,7 +129,7 @@ colnames(transplant)
 class(transplant$startdate) #already a character
 
 transplant <- transplant %>%
-  unite(startdate, c(startdate, year), sep="-", remove=F)
+  unite(startdate, c(startdate, year), sep="-", remove = FALSE)
 #this overwrites the startdate column with the new value, but does not remove the year column (still 13 columns)
 
 transplant <- transplant %>%
