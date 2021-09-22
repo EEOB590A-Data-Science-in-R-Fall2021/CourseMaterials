@@ -48,8 +48,8 @@ transplant %>%
   filter(Island == "Guam") %>%
   summarize(meanwebsize = mean(WebSize.cm.))
 
-#base R approach
-meanguam <- summarize(guamspid[transplant$Island == "Guam",], meanwebsize = mean(WebSize.cm.))
+#non-piping approach, using square brackets to subset
+meanguam <- summarize(transplant[transplant$Island == "Guam",], meanwebsize = mean(WebSize.cm.))
 
 # the code chunk above will translate to something like "you take the transplant data, then you subset the guam data and then you calculate the meanwebsize".
 
@@ -85,15 +85,16 @@ colnames(transplant) #note that I left one with uppercase letters; I will return
 # 3.2: Fix upper case/lower case issues in column names
 #change column names from upper to lowercase
 
-transplant2 <- transplant %>%
-  rename_with(tolower) #check this
+transplant <- transplant %>%
+  rename_with(tolower) #rename_with() renames columns using a function like "tolower"
 
 # To see column names, use colnames or names
 colnames(transplant)
 names(transplant)
 
-#check out function clean_names in Janitor package
-transplant2 <- clean_names(transplant) 
+#check out function clean_names in janitor package. This cleans up your column names for you! 
+library(janitor)
+transplant_excel2 <- clean_names(transplant_excel) 
 
 # Step 4: Add, remove, split, combine columns ----------
 
@@ -165,40 +166,54 @@ transplant$island <- as.factor(transplant$island)
 
 ## 6.2: Change class of multiple columns at a time --------
 transplant <- transplant %>%
-  mutate_at(vars(island, site, web, native, netting, spidpres), factor)
+  mutate(across(c(island, site, web, native, netting, spidpres), as.factor)) #use across to apply a function across multiple columns
+
+str(transplant)
 
 # Step 7: Fill in missing values ------------
 # complete function gives you all combinations of the columns you choose. E.g. if you want to make sure you sampled every island on each of every year, and add rows with NA's for data for any island:year combos you missed, use this function. 
 
 transplant_comp <- transplant %>%
-  complete(island, site)  #note - this is meaningless, just to show how it works
+  complete(island, site)  #note - this is meaningless data-wise, just to show how it works
 
-# The Fill function fills in information from the most recent nonmissing value. This is useful when people enter data and fail to fill in repetitive data (e.g. the first 30 rows are from Site A, but they only write Site once on row 1 and assume it follows for the next 29 rows). 
+# The Fill function fills in information from the most recent non-missing value. This is useful when people enter data and fail to fill in repetitive data (e.g. the first 30 rows are from Site A, but they only write Site once on row 1 and assume it follows for the next 29 rows). 
 
 transplant_comp <- transplant_comp %>%
   fill(web) 
 
 # Step 8: Combine datasets (Join) -------------
-# you have two tables, table x (considered "left" table) and table y (considered "right" table)
+# you have two tables, table x (considered "left" table, here 'transplant') and table y (considered "right" table, here 'preycap')
+
+str(transplant)
+# transplant has 91 obs of 12 variables. 
+# need to make island & site lowercase to join with preycap
+transplant <- transplant %>%
+  mutate(island = str_to_lower(as.character(island)), site = str_to_lower(as.character(site)))
+
 preycap <- read.csv("data/tidy/preycap_tidy.csv")
+# preycap has 361 obs of 6 variables
 
 # Left Join: join matching values from y to x. Return all values of x, and all columns from x and y, but only those from y that match. If multiple matches between x and y, then all combinations are returned.
 leftjoin_transprey <- transplant %>%
   left_join(preycap, by = c("island", "site"))
-# Use by = c("col1", "col2", ...) to specify one or more common columns to match on.
+# Use by = c("col1", "col2", ...) to specify one or more common columns to match on. 
+# returns 4133 obs of 16 variables
 
 # Right Join: join matching values from x to y. Return all rows of y, all columns from x and y, but only those from x that match. As above, if multiple matches, all combinations are returned.
 rightjoin_transprey <- transplant %>%
   right_join(preycap, by = c("island" = "island", "site" = "site"))
 # Use a named vector, by = c("col1" = "col2"), to match on columns that have different names in each table. 
+# Returns 4238 obs of 16 variables
 
 # Inner Join: Join data. Retain only rows from x and y that match, and all columns from both. If multiple matches between x and y, then all combination of matches are returned.
 innerjoin_transprey <- transplant %>%
   inner_join(preycap, by = c("island", "site"))
+# Returns 4086 observations of 16 variables
 
 # Full Join: Join data. retain all values, all rows from both x and y
 fulljoin_transprey <- transplant %>%
   full_join(preycap, (by = c("island", "site")))
+# Returns 4285 obs of 16 variables
 
 # let's figure out why we have the # of rows & columns for each of these join types
 levels(as.factor(preycap$island))
@@ -218,7 +233,7 @@ transplant %>%
   group_by(island, site) %>%
   summarize(numrows = n())
 
-# Since there are lots of matches for island and site, you get a row for every combination. i.e. for anao, get 13 rows in transplant each duplicated for 112 rows from preycap, for a total of 1456 rows.
+# Since there are lots of matches for island and site including some misspellings, you get a row for every combination. i.e. for anao, get 12 rows in transplant each duplicated for 112 rows from preycap, for a total of 1344 rows in the fulljoin_transprey tibble. 
 
 
 # Step 9: Write csv file with tidy dataset -------
