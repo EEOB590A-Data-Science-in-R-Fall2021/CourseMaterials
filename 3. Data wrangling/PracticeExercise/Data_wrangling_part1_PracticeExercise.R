@@ -2,27 +2,29 @@
 # 22 September 2021 
 # Data wrangling part 1, practice script ----------
 
-# We will be working with a real insect pan traps dataset that I've amended 
+# We will be working with a real insect pan traps dataset that I've amended
 # slightly in order to practice the skills from Monday.  
-# The file is called "Data_wrangling_day1_pollination.xlsx"
+# The file is called "Data_wrangling_day1_pollination.xlsx" and it is 
+# located in the data folder, and then in the raw folder within that. 
 
 # 1) Load libraries -----
 # you will need tidyverse and readxl
 
-# 2) Read in data from the InsectData tab --------
+# 2) Read in data from the InsectData worksheet --------
 
 # 3) Rename columns --------
-# Leave columns of insect families with capital letters, but make all other 
+# Leave columns of insect orders with capital letters, but make all other 
 # column names lowercase. 
 # Remove any spaces in column names. Change "location" to "site". 
 # Change "tract" to "transect". 
 
 # 4) Add missing data --------
-# Note that the people who entered the data did not drag down the island or 
-# location column to fill every row. Double check to make sure this worked correctly. 
+# The people who entered the data did not drag down the island or location
+# column to fill every row. Use code to fill in this missing data. 
+# Double check to make sure this worked correctly. 
 
 # 5) Separate "Top color - Bowl color" into two different columns ------
-# The first letter represents the top color and the second letter represents the 
+# The first letter represents the top color and the second letter represents the
 # bowl color. We do not need to save the original column. 
 
 # 6) Use the complete function ----------

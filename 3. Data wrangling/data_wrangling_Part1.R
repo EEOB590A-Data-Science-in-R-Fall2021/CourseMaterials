@@ -188,7 +188,7 @@ str(transplant)
 # transplant has 91 obs of 12 variables. 
 # need to make island & site lowercase to join with preycap
 transplant <- transplant %>%
-  mutate(island = str_to_lower(as.character(island)), site = str_to_lower(as.character(site)))
+  mutate(island = str_to_lower(as.character(island)),   site = str_to_lower(as.character(site)))
 
 preycap <- read.csv("data/tidy/preycap_tidy.csv")
 # preycap has 361 obs of 6 variables
@@ -196,12 +196,14 @@ preycap <- read.csv("data/tidy/preycap_tidy.csv")
 # Left Join: join matching values from y to x. Return all values of x, and all columns from x and y, but only those from y that match. If multiple matches between x and y, then all combinations are returned.
 leftjoin_transprey <- transplant %>%
   left_join(preycap, by = c("island", "site"))
+
 # Use by = c("col1", "col2", ...) to specify one or more common columns to match on. 
 # returns 4133 obs of 16 variables
 
 # Right Join: join matching values from x to y. Return all rows of y, all columns from x and y, but only those from x that match. As above, if multiple matches, all combinations are returned.
 rightjoin_transprey <- transplant %>%
   right_join(preycap, by = c("island" = "island", "site" = "site"))
+
 # Use a named vector, by = c("col1" = "col2"), to match on columns that have different names in each table. 
 # Returns 4238 obs of 16 variables
 
@@ -239,4 +241,4 @@ transplant %>%
 # Step 9: Write csv file with tidy dataset -------
 
 # create tidy database for analysis. Add to tidy folder
-write.csv(transplant, "data/tidy/transplant_tidy.csv", row.names=F)
+write.csv(transplant, "data/tidy/transplant_tidy.csv", row.names=FALSE)
