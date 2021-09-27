@@ -1,8 +1,8 @@
 # EEOB590: Data wrangling Part 2 ----------
 
 # Part 2: Finish getting data frame tidied and wrangled 
-  # 1) Change class of columns
-  # 2) Create new columns (mutate)
+  # 1) Create new columns or edit observations within column (mutate)
+  # 2) Change class of columns
   # 3) Fix cells within columns (change levels tolower/toupper, rename factor levels (forcats package), reorder factor levels, ghost factor levels, trimws, scale/center continuous variable, work with dates)
   # 4) Arrange data by the levels of a particular column (arrange)
   # 5) Print tidied, wrangled database
@@ -16,7 +16,15 @@ transplant <- read_csv("data/tidy/transplant_tidy.csv")
 str(transplant)
 summary(transplant)
 
-# 1: Change class of columns ----------
+# 1: Create new columns or edit observations within existing columns (mutate) ----------
+
+transplant <- transplant %>%
+  mutate(webarea = pi * ((websize/2)/100)^2) %>%
+  print() #print the first few rows to check
+
+#assume circle, divide in half to get radius, divide by 100 to get from cm to m, calculate area (pi * radius squared)
+
+# 2: Change class of columns ----------
 # note - the as.character and as.numeric lines are in here for teaching purposes since those columns are already in the right class. 
 
 transplant <- transplant %>%
@@ -24,14 +32,6 @@ transplant <- transplant %>%
   mutate(across(c(island, site, web, native, netting, spidpres, webpres), 
             as.factor)) %>% # to change multiple columns at a time
   mutate(across(c(web_a, web_b), as.character)) 
-
-# 2: Create new columns (mutate) ----------
-
-transplant <- transplant %>%
-  mutate(webarea = pi * ((websize/2)/100)^2) %>%
-  print() #print the first few rows to check
-
-#assume circle, divide in half to get radius, divide by 100 to get from cm to m, calculate area (pi * radius squared)
 
 # 3: Fix cells within columns (e.g. naming, capitalization) ----------
 
