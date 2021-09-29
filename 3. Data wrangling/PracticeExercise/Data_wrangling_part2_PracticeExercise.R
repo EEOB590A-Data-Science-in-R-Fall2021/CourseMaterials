@@ -1,42 +1,45 @@
-# EEOB590A
-# Data_wrangling part 2 practice exercise
-# practice tidying and wrangling 
+# EEOB590A - Data_wrangling part 2 practice exercise ------
 
-#from the tidy folder, read in the partialtidy file for pollination from last week's assignment
+# Part 1: Get set up ----------
 
-###########################################################
-#####Part 1: finish tidying & wrangling dataframe #########
+## 1.1) Load libraries ----------
 
-#1) Broad changes to the database
+## 1.2) Read in data ----------
+# From the tidy folder, read in the file on pollination you created after finishing last week's assignment
 
-#1a) Change the class of each variable as appropriate (i.e. make things into factors or numeric)
+## 1.3) Change name of columns -------
+# "date traps out" should be "dateout" and and "date traps coll" sould be "datecoll"
 
-#2) Fix the errors below within cells 
+## 1.4) Change the class of each variable as appropriate ------
+# Make variables into factors, numeric, character, etc. Leave the dates as is for now. 
 
-##2a) Fix the levels of site so that they have consistent names, all in lowercase
+## 1.5) What format are the dates in? Change to date format ----
 
-##2b) What format are the dates in? Do they look okay? 
+# Part 2: Fix errors within cells ------
 
-##2c) Do you see any other errors that should be cleaned up? 
+## 2.1) Fix the levels of island and site ------
+# Maks sure all island and site names are in lowercase 
+# Rename sites: forbigrid as forbig and racetrack as race
 
-#3) Create a new column for the duration of time traps were out
+## 2.2) Do you see any other errors that should be cleaned up? -----
+# Just good practice to do a final check on this. Insect orders should remain capitalized. 
 
-#4) Arrange data by the number of insects
+# Part 3: Create new columns ------
 
-#5) Print tidied, wrangled database
+## 3.1: Create a new column for the duration of time traps were out. ------
+# Make sure new column is in the numeric class. 
 
-#####################################################
-####Part 3: start subsetting & summarizing ##########
+## 3.2: Create a new column with just the first 5 letters of the InsectOrder ------
+# Name new column order_abbrev and make sure it is a factor 
 
-#6) Make a new dataframe with just the data from Guam at the racetrack site and name accordingly. 
+# Part 4: Re-arrange levels of a variable and rearrange rows ------
+## 4.1) Arrange levels of insectorder by average number of insects. ------ 
+#this will let us create a graph later on of insect orders with the most common on one side and least common on the other side of the x-axis.
 
-#7) Make a new dataframe with just the uniqueID, island, site, transect, insectorder, numinsects, and duration columns. 
+## 4.2) Arrange entire dataset by the number of insects ------
+# make these descending, so the greatest number is on row 1. 
 
-#8) With the full database (not the new ones you created in the two previous steps), summarize data, to get: 
-#8a) a table with the total number of insects at each site
-#8b) a table that shows the mean number of insects per island
-#8c) a table that shows the min and max number of insects per transect
+# Part 5: Print tidied, wrangled database ------
+# name file "poll_long_tidy.csv" and put in tidy database
 
-#9a) Figure out which insect order is found across the greatest number of sites
 
-#9b) For that insect order, calculate the mean and sd by site. 
