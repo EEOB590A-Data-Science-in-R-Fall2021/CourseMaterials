@@ -42,7 +42,7 @@ summary(transplant) #need to fix capitalization, spelling, whitespace (maybe)
 
 transplant <- transplant %>%
   mutate(across(c(island, site), tolower)) %>%
-  mutate(across(c(island, site), factor)) %>%
+  mutate(across(c(island, site), as.factor)) %>%
   print() #shows first few lines of dataframe 
 
 # across() allows you to apply the same function to multiple columns 
@@ -71,6 +71,8 @@ str(transplant)
 ## 2.3: Re-order levels within a variable (forcats) ----------
 # default order is alphabetical. When you graph or run analyses, you may want a different order. 
 
+levels(transplant$site)
+
 # tidyverse approach 
 
 # Manually re-order
@@ -79,15 +81,18 @@ transplant <- transplant %>%
 
 levels(transplant$island)
 
+#base R approach for fct_relevel
+transplant2$site <- factor(transplant$site, levels = c("nblas", "anao", "ladt", "forbi", "mtr"))
+
 # Reorder by the levels of another variable
 transplant2 <- transplant %>%
-  mutate(web = fct_reorder(web, websize)) %>%
+  mutate(web = fct_reorder(web, websize, mean)) %>%
   view()
 
 #view shows that the rows are still in the same order, but the levels have been reordered
 levels(transplant2$web)
 
-# Reorder by the frequency of the variable
+# Reorder by the frequency of the variable, largest first
 levels(transplant$site) #in alphabetical order
 
 transplant <- transplant %>%
@@ -95,21 +100,32 @@ transplant <- transplant %>%
 
 levels(transplant$site) 
 
-#base R approach
-transplant2$site <- factor(transplant$site, levels = c("nblas", "anao", "ladt", "forbi", "mtr"))
+transplantex <- transplant %>%
+  mutate(site = fct_rev(site))
+
+levels(transplantex$site) #now shows order from fewer to more obs
 
 ## 2.4: Get rid of ghost levels ----------
 # sometimes you get rid of a level and R still thinks it is there (i.e. there are 0 rows, but it still shows up when you use levels() on your variable)
 
+#first create ghost level by adding level to factor
+transplant <- transplant %>%
+  mutate(island = fct_expand(island, "hawaii"))
+levels(transplant$island)
+
 #tidyverse approach
 transplant2 <- transplant %>%
-  mutate(fct_drop(island)) 
+  mutate(fct_drop(island)) # not working 
 levels(transplant2$island)
 
 #base R approach
-transplant2$island <- droplevels(transplant$island) # or
+transplant2$island <- droplevels(transplant2$island) # or
 transplant2$island <- factor(transplant$island)
 levels(transplant2$island)
+
+## create anonymous/arbitrary identifier for a factor
+transplant3 <- transplant %>%
+  mutate(anon_island = fct_anon(island, prefix = "test"))
 
 ## 2.5: Deal with character data or complex strings (stringr) -----
 # string functions work with regular expressions, patterns of text

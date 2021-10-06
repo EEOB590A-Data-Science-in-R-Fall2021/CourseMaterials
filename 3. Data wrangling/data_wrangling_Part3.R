@@ -21,7 +21,7 @@ summary(transplant)
 #use filter to extract rows based on values of columns. 
 
 # Create a table from transplant data with only data from the anao site.  
-(transplant_guam <- transplant %>%
+(transplant_anao <- transplant %>%
   filter(site == "anao")) #note the use of  == not =
 
 # Note - adding the parentheses around the whole thing makes it produce a variable and print the head of the tibble in the console. 
@@ -46,16 +46,16 @@ summary(transplant)
 
 # Another way to do this is to use the %>% function, which can be used to identify if an element belongs to a vector or dataframe. For example, this will select every row where the site is anao, ladt, or forb
 (transplant_sites2 <- transplant %>%
-  filter(site %in% c("anao", "ladt"))) 
+  filter(site %in% c("anao", "ladt", "forb"))) 
 
 # NA's: filter() only includes rows where the condition is TRUE; it excludes both FALSE and NA values. If you want to preserve missing values, ask for them explicitly
 (transplantbig_na <- transplant %>%
   filter(is.na(webarea) | webarea > 0.2)) #note, there aren't any webarea values that are "NA", but this is the code to use if there were and you wanted to keep them as well as the web areas greater than 0.2
 
+
 #Your turn: Use filter to keep only rows with "native" webs where the web is absent, and the duration is less than or equal to 4. How many rows and variables does this produce?
 
-(transplant_myturn <- transplant %>%
-  filter(native == "yes" & webpres == "no" & duration <= 4))
+#Your turn 2: keep rows where startdate is before 2013-07-30 and end date is before 2013-08-02 and webpres is yes. 
 
 
 # 2: Choose columns by their names (select) ----------
@@ -97,7 +97,7 @@ summary(transplant)
 # Without using group_by (below), summarise collapses a dataframe to a single row
 
 (transplant_summ <- transplant %>%
-  summarise(avg = mean(websize))) # name the new column "avg"
+  summarize(avgweb = mean(websize))) # name the new column "avgweb"
 
 # You can do multiple summary calculations at a time
 (transplant_summ2 <- transplant %>%
@@ -112,7 +112,8 @@ summary(transplant)
 # You can also do summary calculations on a subset of the data. 
 # This calculates the average websize of all webs larger than 50 cm. 
 (transplant_summ3 <- transplant %>%
-    summarise(avglarge = mean(websize > 50))) 
+    filter(websize > 50) %>%
+    summarise(avglarge = mean(websize))) ## look at this more 
 
 # There are a bunch of ways to get the # of rows or # of levels of a variable
 (transplant_summ4 <- transplant %>%
@@ -138,7 +139,8 @@ transplant %>%
 tapply(transplant$websize, transplant$site, median)
 
 # table is a handy base R function that counts number of rows based on 1 or more variables
-with(transplant, table(site))
+with(transplant, table(site)) # OR
+table(transplant$site)
 with(transplant, table(native, netting))
 with(transplant, table(island, native, netting))
 with(transplant, ftable(island, native, netting)) #ftable works better for 3 variables (ftable = "flat contingency table")
@@ -151,30 +153,64 @@ transplant %>%
   group_by(island) %>%
   summarize (avg = mean(websize))
 
-transplant_summ <- transplant %>%
+(transplant_summ <- transplant %>%
   group_by(island, site, netting) %>%
   summarize (avgweb = mean(websize),
-             avgduration = mean(duration))
+             avgduration = mean(duration), 
+             numobs = n()))
 
 # Can use group_by with other functions too. 
 # Here, we use filter to pull out the sites that have more than 2 rows for a combination of island/site/native (i.e. a site that has 3 or more spiders that were already in place (native) or moved (not native)), and then summarize the mean websize within each of those groups (e.g. 'native' spiders at anao)
 
-(transplant_summ2 <- transplant %>%
+transplant_summ2 <- transplant %>%
   group_by(island, site, native) %>%
   filter(n() > 2) %>%
-  summarize (avgweb = mean(websize), .groups = "drop"))  #.groups ungroups the output, which can be handy for future calculations using this tibble. 
+  summarize (avgweb = mean(websize), .groups = "drop")  #.groups ungroups the output, which can be handy for future calculations using this tibble. 
 
 # Your turn: Calculate the mean, median, min, and max duration for webs with and without netting on Guam and Saipan, and calculate the number of webs in each group
 
-transplant %>%
-  group_by(island, netting) %>%
-  summarize(mean_dur = mean(duration), med_dur = median(duration), min_dur = min(duration), max_dur = max(duration), nwebs = n())
-
 # Your turn, advanced version: 1. Calculate mean duration of webs with and without netting at each site on each island. 2. Add these average duration values to the tidy transplant dataset (the one we loaded at the start of this script). 3. Select just the island, site, netting, mean_dur, web, websize, duration columns. 4. Add a column that calculates the difference between duration of each web and the mean_duration for all webs at that island/site/netting combo. 
 
-(transplant2 <- transplant %>%
+
+
+
+
+
+
+
+
+
+
+
+#**********************
+# Answers for the "My Turns"
+  
+(transplant_myturn <- transplant %>%
+    filter(native == "yes" & webpres == "no" & duration <= 4))
+
+(transplant_dates <- transplant %>%
+    filter(startdate < "2013-07-30" & enddate < "2013-08-02" & webpres =="yes"))
+  
+  
+  transplant %>%
+  group_by(island, netting) %>%
+  summarize(mean_dur = mean(duration), 
+            med_dur = median(duration), 
+            min_dur = min(duration), 
+            max_dur = max(duration), 
+            nwebs = n())
+
+#better approach
+transplant2a <- transplant %>%
   group_by(island, site, netting) %>%
-  summarize(mean_dur = mean(duration), .groups = "drop") %>%
-  right_join(transplant, by = c("island", "site", "netting")) %>%
-  select(island, site, netting, mean_dur, web, websize, duration) %>%
-  mutate(diff_meandur = duration - mean_dur))
+  mutate(avg_dur = mean(duration),
+         diff_avg_duration = duration - avg_dur) %>%
+  select(island, site, netting, web, websize, avg_dur, diff_avg_duration)
+
+#also works
+transplant2b <- transplant %>%
+    group_by(island, site, netting) %>%
+    summarize(mean_dur = mean(duration), .groups = "drop") %>%
+    right_join(transplant, by = c("island", "site", "netting")) %>%
+    select(island, site, netting, mean_dur, web, websize, duration) %>%
+    mutate(diff_meandur = duration - mean_dur)
