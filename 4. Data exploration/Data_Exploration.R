@@ -27,12 +27,11 @@
 # Q3: Does duration web persists depend on island or netting or a combination of the two? 
 
 # Variables of Interest
-#Response: websize (continuous), duration (continuous)
-#Predictor: island (categorical), native (categorical), netting (yes/no)
-#Random effect: site (categorical)
+# Response: websize (continuous), duration (continuous)
+# Predictor: island (categorical), native (categorical), netting (yes/no)
+# Random effect: site (categorical)
 
 # 2: Load libraries and dataset --------
-library(ggplot2)
 library(tidyverse)
 library(skimr) # just to check out a function
 library(DataExplorer) # just to check out a function
@@ -60,7 +59,7 @@ nrow(truetrans)#62 rows
 # Missing response means you cannot use that row in analysis
 # Missing value in one of your predictors will typically drop that entire row from analysis
 
-str(transplant) 
+summary(transplant) 
 
 (transplantNA <- transplant %>%
   complete(island, site, duration))
@@ -102,6 +101,34 @@ transplantord <- transplant %>%
   arrange(island, duration)  # Orders rows by values of a column (low to high).
 
 ## Your Turn: play around - what else might you want to summarize? 
+transplant %>%
+  group_by(island, site, duration) %>%
+  summarise(avg_web = mean(websize),
+            sd_web = sd(websize, na.rm = T)) %>%
+  arrange(desc(duration))
+
+transplant %>%
+  group_by(island, site) %>%
+  count(spidpres, webpres)
+
+transplant %>%
+  group_by(island) %>%
+  summarize(maxweb = max(websize)) 
+
+transplant %>%
+  group_by(native) %>%
+  summarise(avgweb = mean(websize))
+
+transplant %>%
+  group_by(island, site, netting) %>%
+  summarise(across(where(is.numeric), ~ mean(.x, na.rm = TRUE)))
+
+transplant %>%
+  group_by(island, site) %>%
+  summarize(mean_wa = mean(webarea),
+            sd_wa = sd(webarea),
+            max_wa = max(webarea),
+            min_wa = min(webarea)) ## looking at basic descriptive statistics for web area and range/variation at each sampling site
 
 ## 4.2: Introduction to ggplot --------
 # Resources
@@ -116,6 +143,8 @@ transplantord <- transplant %>%
 durationhist <- ggplot(data = transplant, aes(duration))+
   geom_histogram()
 
+durationhist
+
 # barplot  - to count number of rows per category of a variable
 ggplot(transplant, aes(site))+
   geom_bar()
@@ -129,13 +158,28 @@ ggplot(transplant, aes(netting, duration, color=island))+
   geom_boxplot() 
 
 # geom_point for two continuous variables - scatterplot
-ggplot(transplant, aes(websize, duration))+
+ggplot(transplant, aes(websize, duration)) +
   geom_point()
 
 # add facet_grid to show other variables
 ggplot(transplant, aes(websize, duration))+
   geom_point()+
   facet_grid(netting~island)
+
+# Your Turn: play around - graph the same relationship you used table or summarize to explore in the last section. 
+ggplot(transplant, aes(webpres, fill = spidpres)) +
+  geom_bar()
+
+transplant %>%
+  group_by( duration) %>%
+  summarise(avg_web = mean(websize),
+            sd_web = sd(websize, na.rm = T)) %>%
+  arrange(desc(duration)) %>%
+  ggplot(aes(x = duration, y = avg_web)) +
+  geom_col( color = "black", fill = "grey70") +
+  geom_errorbar(aes(x = duration, ymin = avg_web - sd_web, ymax = avg_web + sd_web),
+                width = .25) +
+  theme_bw()
 
 ## 4.3: Skim and Create Report -----
 # try these two functions, from the skimr and DataExplorer packages
@@ -168,16 +212,22 @@ dotchart(transplant$duration)
 #### no major outliers in Y -websize or duration, all X's are categorical
 
 ## 5.2:	Examine Zero inflation Y --------
+# #For count data, mostly
+# If >25% of response values are 0, may have zero-inflated data. Will need to use zero-inflated model approach. 
 
 #### Not applicable for websize, because response is continuous
 #### duration doesn't have any zero's so not an issue here. 
 
 
-## 5.3:	Check for collinearity in X's: correlation between covariates ------
-#i.	Plot each continuous predictor against each other 
+## 5.3:	Check for collinearity in X's  ------
+# collinearity is when predictor variables are highly correlated
+# Plot each continuous predictor against each other 
+
 #### since our predictors are categorical, we can't test this directly
 
-## 5.4: Look at relationships of Y vs X’s to see if homogenous variances at each X value, linear relationships -----
+## 5.4: Look at relationships of Y vs X’s -----
+# Check if variances are homogenous for each X value
+# Check if relationships are linear
 # Plot response against each predictor and random effect. 
 ggplot(transplant, aes(native, websize, color=island))+
   geom_boxplot()
@@ -194,12 +244,12 @@ ggplot(transplant, aes(native, websize, color=island))+
   facet_grid(.~site)
 
 #### But nothing really stands out in terms of site-level effects. NBLAS higher than Anao, 
-#### anao doens't have "yes" native spiders, MTR doesn't have "no" native spiders
+#### anao doesn't have "yes" native spiders, MTR doesn't have "no" native spiders
 
 # Are there other potential factors that reduce independence of Y’s? 
 #### timing is similar, can't think of anything else that might matter. 
 
-## 5.6 - Do you have sufficient data?  
+## 5.6 - Do you have sufficient data? --------
 # As a rule of thumb, (all models), should have 15 to 20 observations for each parameter. So, if have 50 observations, should really only have 3 parameters. 
 # 6 parameters max here
 
