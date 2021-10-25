@@ -1,6 +1,6 @@
 # Data simulation -------
 
-# We will simulate a dataset for the spider transplant project, as if we are 
+# We will simulate a dataset for the spider transplant project
 
 # load library -----
 library(tidyverse)
@@ -22,16 +22,16 @@ transplant_tidy <- read.csv("data/tidy/transplant_tidy_clean.csv")
 # 2. Simulate response ------------
 # we will treat websize as a normal distribution
 # we predict that webs will be smaller on Saipan without a net 
-gnetwebsize <- rnorm(n = 21, mean = c(54), sd = c(5)) #simulate guam with net
+set.seed(30); gnetwebsize <- rnorm(n = 21, mean = c(54), sd = c(5)) #simulate guam with net
 gnonetwebsize <- rnorm(n = 21, mean = c(54), sd = c(5)) #simulate guam without net
 snetwebsize <- rnorm(n = 21, mean = c(54), sd = c(5)) #simulate saipan with net
 snonetwebsize <- rnorm(n = 21, mean = c(49), sd = c(4)) #simulate saipan without net
 websize <- c(gnetwebsize, gnonetwebsize, snetwebsize, snonetwebsize)
 
 # other distributions
-gpois <- rpois(n=21, lambda=54)
-gunif <- runif(n=21, 40, 64)
-gbinom <- rbinom(n=21, size=1, .1)
+gpois <- rpois(n = 21, lambda = 54)
+gunif <- runif(n = 21, min = 40, max = 64)
+gbinom <- rbinom(n = 21, size = 1, .1)
 
 # 2. Simulate predictors ---------
 
@@ -61,17 +61,17 @@ ggplot(simtransplant, aes(websize))+
 
 
 # 5. Run a model with dataset -------
-m1 <- lm(response ~ netting * island, data = simtransplant)
+m1 <- lm(websize ~ netting * island, data = simtransplant)
 summary(m1)
 
 # 6. Using tidyverse approach ---------
-n_obs = 84 # must use a factor of 4, try 84, 168, 336, 504
+n_obs = 168 # must use a factor of 4, try 84, 168, 336, 504
 tidysimtransplant <- data.frame(uniqueid = seq(1, n_obs, 1)) %>%
   mutate(
-    island = rep(c("guam", "saipan"), each = 2, times = n_obs/4),
-    #site = rep(c("a", "b", "c", "d", "e", "f"), each = 2, times = n_obs/12),
-    netting = rep (c("yes", "no"), each = 1, times = n_obs/2), 
-    websize = rnorm(n_obs, mean = c(54, 54, 54, 49), sd = c(5, 5, 5, 4)))
+    island = rep(c("guam", "saipan"), each = 2, times = 1, length.out = n_obs),
+    site = rep(c("a", "b", "c", "d", "e", "f"), each = 2, times = 1, length.out = n_obs),
+    netting = rep (c("yes", "no"), each = 1, times = 1, length.out = n_obs), 
+    websize = rnorm(n_obs, mean = c(54, 54, 54, 35), sd = c(5, 5, 5, 4)))
 
 ggplot(tidysimtransplant, aes(island, websize, color = netting)) +
     geom_boxplot()
