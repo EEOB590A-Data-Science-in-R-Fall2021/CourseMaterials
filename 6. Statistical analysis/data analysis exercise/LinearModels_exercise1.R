@@ -2,7 +2,7 @@
 
 #We are going to work with a dataset on plant traits. We will test whether leaf thickness differs between tree species and island. Today, we will only do data exploration and model building/selection. We will assess model fit and interpret model results next week. 
 
-#Helpful scripts to have open while you work on this include: DataExplorationDay2_practice_answers.R, DataExplorationDay2.R, and LinearModels.R (from class Tuesday)
+#Helpful scripts to have open while you work on this include:  DataExplorationDay2.R, and LinearModels.R (from class Tuesday)
 
 #Response: thickness (leaf thickness)
 #Predictors: species, island
@@ -26,9 +26,9 @@ traits <- traits %>%
 #3. Start with continuous variables - of which we only have the response (thickness)
 # a) Check for outliers
 
-# b) Check for zero-inflation (not relevant bc it's a measurement not a count)
+# b) Check for zero-inflation (is this relevant here?)
 
-# c) Check for independence in the response (is each row independent?) or might there be some patterns we are not including. 
+# c) Check for independence in the response (is each row independent?). Are there some patterns we are not including? 
 
 #4. Now categorical predictors. Do you have an adequate sample size? How many measurements per level of island and per level of species? 
 
@@ -38,6 +38,7 @@ traits <- traits %>%
 
 #6) Look at relationships of Y vs X’s to see if variances are similar for each X value, identify the type of relationship (linear, log, etc.)
 #plot each predictor and random effect against the response
+
 
 ### Summary of data exploration ### 
 #what did you find? 
