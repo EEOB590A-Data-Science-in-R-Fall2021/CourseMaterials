@@ -15,8 +15,8 @@ library(ggplot2)
 library(emmeans) #for post-hoc test
 library(tidyverse)
 library(ggResidpanel)
-library(car) #note, may need to install "openxlsx" package too and choosing "no" when they ask if you want to install from sources which need compilation. 
-library(lmerTest) #automatically loads lme4 package
+library(car) 
+library(lmerTest) #also loads lme4 package
 
 # 3. Load data -------
 transplant<-read.csv("data/tidy/transplant_tidy_clean.csv", header=T)
@@ -75,7 +75,8 @@ anova(webmod1a) #native main effect is not significant
 webmod_classic <- lm(websize ~ island, data = transplant)
 anova(webmod_classic)
 
-# anova(model) gives Type I sums of squares, which means the reference level is tested first and then other levels, and then interactions. R defaults to treatment contrasts, where first level is baseline, and all others are in reference to that. Can get different results for unbalanced datasets depending on which factor is entered first in the model and thus considered first. For information on Type II and III sums of squares, see the end of this script. 
+# R defaults to treatment contrasts, where first level is baseline, and all others are in reference to that. 
+# anova(model) gives Type I sums of squares, which means the reference level is tested first and then other levels, and then interactions. Can get different results for unbalanced datasets depending on which factor is entered first in the model and thus considered first. For information on Type II and III sums of squares, see the end of this script. 
 
 ### 6.2.2. Keep full model --------
 # If you do an experiment, don’t do any model selection at all- fit model that you think makes sense, and keep everything as it is, even non-significant parameters. Some might choose to do some model selection to keep only significant interactions, but once fit model with main effect terms, then stick with it. 
@@ -119,22 +120,26 @@ AIC(webmod1, webmod2, webmod3, webmod4, webmod_null) #webmod3 has lowest AIC, by
 
 ## 7.1 - Use base plot function -------
 # for lm can use plot(model), but this doesn't work for glm & glmer
-plot(webmod1)
+par(mfrow = c(2,2), mar = c(5,5,2,2))
+plot(webmod1) 
+
+# gives fitted vs residuals, normal Q-Q plot, fitted vs square root of the absolute value of the standardized residuals, and residuals vs leverage. 
 
 ## 7.2 - use ggResidpanel --------
 # package was developed by ISU grad students in STATS!
 resid_panel(webmod1)
+resid_panel(webmod1, plots = "all")
 resid_compare(list(webmod1, webmod3)) #to compare two models
 resid_xpanel(webmod1) #to plot residuals against predictor variables
 
 ## 7.3 - Pull out fitted and residual values by hand --------
 #extract residuals
 E1 <- resid(webmod1, type = "pearson")
+# Pearson's residuals are the standardized distances between the observed and expected responses
 
 # plot fitted vs residuals
 F1 <- fitted(webmod1, type = "response")
 
-par(mfrow = c(2,2), mar = c(5,5,2,2))
 plot(x = F1, 
      y = E1, 
      xlab = "Fitted values",
@@ -147,19 +152,20 @@ abline(h = 0, lty = 2)
 
 ## 8.1: anova(model) or summary(model) -------
 # If you have only continuous predictors, or two levels within a factor, can use anova(model) or summary(model) 
-webmod3<-lm(websize ~ island, data = transplant)
+webmod3 <- lm(websize ~ island, data = transplant)
 anova(webmod3) #island is a significant predictor. 
 summary(webmod3) #spiders on Saipan make webs that are 5.2 cm smaller than those on Guam. 
 
 ## 8.2: Post-hoc tests ---------
-# If you have multiple levels of a factor, or interactions between factors, will need a post-hoc test to assess differences between levels of the factor or combinations involved in the interaction. There are several options, but emmeans is a good one (also see glht in multcomp). 
+# If you have multiple levels of a factor, or interactions between factors, will need a post-hoc test to assess differences between levels of the factor or combinations involved in the interaction. There are several options, but emmeans is a good one (also see glht in multcomp). In general, there is little difference between using emmeans::contrast() and multcomp::glht(). emmeans = esimated marginal means, also known as least square means. 
 
 #For the purposes of demonstration, we will use the full model with the interaction here, even though the best fitting model has only island as a predictor. 
 
-isl <- emmeans(webmod1, pairwise ~ island*native) # to test whether there are differences between guam & saipan given a particular native status
+isl <- emmeans(webmod1, pairwise ~ island * native) # to test whether there are differences between guam & saipan given a particular native status
 isl #shows p-value;compare to
 summary(webmod1)
 
+# get the p-val
 isl_contrasts <- isl$contrasts %>%
         summary(infer = TRUE) %>%
         as.data.frame()
@@ -171,12 +177,12 @@ natisl <- emmeans(webmod1, pairwise ~native | island) #to test whether there are
 natisl
 
 ## 8.3: Confidence intervals --------
-confint(webmod3) #Intercept is guam. The coefficients for Saipan have confidence intervals that do not cross zero, so can conclude Saipan is different from Guam. 
+confint(webmod3) #Intercept is guam. The coefficient for Saipan has confidence intervals that do not cross zero, so can conclude Saipan is different from Guam. 
 
 ## 8.4: Classic model comparison with Likelihood Ratio Tests --------
 #Best fitting model was: 
-webmod3<-lm(websize~island, data = transplant)
-#can use either Option 1 or Option 2 above. 
+webmod3 <- lm(websize ~ island, data = transplant)
+# see section 6.3.1 above.  
 
 ## 8.5: Information Theoretic approach ------------
 # From 6.2.4 - 
@@ -211,11 +217,11 @@ anova(lm(websize ~ island + native, data = transplant))
 #in this model, we have added a random effect of site
 #we will use lmerTest package. Tutorial is here: http://www2.compute.dtu.dk/courses/02930/SummerschoolMaterialWeb/Readingmaterial/MixedModels-TuesdayandFriday/Packageandtutorialmaterial/lmerTestTutorial.pdf
 
-webmod_mm<-lmer(websize ~ island*native + (1|site), data=transplant)
+webmod_mm <- lmer(websize ~ island * native + (1|site), data=transplant)
 summary(webmod_mm) 
 
 #Let's remove the non-significant interaction, and then continue with model. 
-webmod_mm2<-lmer(websize ~ island+native + (1|site), data=transplant)
+webmod_mm2 <- lmer(websize ~ island + native + (1|site), data=transplant)
 summary(webmod_mm2)
 
 #note- could also use the step function to reduce model
@@ -240,14 +246,14 @@ transplant %>%
         count(spidpresbin)
 
 #Run glm with family = binomial 
-spidmod <- glm(spidpresbin ~ island*netting, family = binomial, data=transplant)
+spidmod <- glm(spidpresbin ~ island * netting, family = binomial, data=transplant)
 summary(spidmod) 
 
 #check model fit
-resid_panel(spidmod) #QQplot doesn't look very good. I'm not sure why. We will move forward with this for now. 
+resid_panel(spidmod) 
 
 #interpret results
-summary(spidmod) #the effect of netting depends on the island. 
+summary(spidmod) # the effect of netting depends on the island. 
 
 #post-hoc test
 islnetting <- emmeans(spidmod, pairwise ~ island*netting)
