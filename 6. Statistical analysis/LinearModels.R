@@ -159,13 +159,18 @@ summary(webmod3) #spiders on Saipan make webs that are 5.2 cm smaller than those
 ## 8.2: Post-hoc tests ---------
 # If you have multiple levels of a factor, or interactions between factors, will need a post-hoc test to assess differences between levels of the factor or combinations involved in the interaction. There are several options, but emmeans is a good one (also see glht in multcomp). In general, there is little difference between using emmeans::contrast() and multcomp::glht(). emmeans = esimated marginal means, also known as least square means. 
 
+# For a single factor
+webmod3 <- lm(websize ~ island, data = transplant) # best-fitting model
+isl_only <- emmeans(webmod3, "island") #create an EMMgrid object
+pairs(isl_only) # use pairs to do pairwise comparisons for the factor indicatd in the EMMgrid object above
+
 #For the purposes of demonstration, we will use the full model with the interaction here, even though the best fitting model has only island as a predictor. 
 
 isl <- emmeans(webmod1, pairwise ~ island * native) # to test whether there are differences between guam & saipan given a particular native status
 isl #shows p-value;compare to
 summary(webmod1)
 
-# get the p-val
+# get the p-value with 
 isl_contrasts <- isl$contrasts %>%
         summary(infer = TRUE) %>%
         as.data.frame()

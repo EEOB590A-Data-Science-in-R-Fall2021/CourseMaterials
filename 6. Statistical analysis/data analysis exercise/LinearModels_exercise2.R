@@ -28,18 +28,18 @@ thick1 <- lm(thickness ~ island*species, data = traits)
 #Option 1: Traditional hypothesis testing (simplified model). 
 #use emmeans to tell whether there are differences between islands for a given species
 #which species differ between islands? 
-thick1 <- lm(thickness ~ island*species, data = traits) #final model
+thick1 <- lm(thickness ~ island * species, data = traits) #final model
 
 #Option 2: Full model approach. 
-#get confidence intervals using emmeans, and determine species
-thick1 <- lm(thickness ~ island*species, data = traits) #final model
+#get confidence intervals using emmeans, and determine whether species differ
+thick1 <- lm(thickness ~ island * species, data = traits) #final model
 
 #Option 3: Likelihood Ratio Test approach
 #use emmeans to determine whether there are differences between species across all islands
-thick1 <- lm(thickness ~ island*species, data = traits) #final model
+thick1 <- lm(thickness ~ island * species, data = traits) #final model
 
 #Option 4: Create a full model and all submodels and compare AIC values to choose the best fitting model
 #just interpret the best fitting model. 
-thick1 <- lm(thickness ~ island*species, data = traits) #final model
+thick1 <- lm(thickness ~ island * species, data = traits) #final model
 
 
