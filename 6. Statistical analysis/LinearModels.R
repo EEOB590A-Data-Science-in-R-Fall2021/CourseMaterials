@@ -178,7 +178,7 @@ isl_contrasts <- isl$contrasts %>%
 #can use emmeans to test for main effects when there is an interaction present. 
 #emmeans tutorial is here: https://aosmith.rbind.io/2019/03/25/getting-started-with-emmeans/
 
-natisl <- emmeans(webmod1, pairwise ~native | island) #to test whether there are differences between native & not native given that you are on Guam or Saipan
+natisl <- emmeans(webmod1, pairwise ~ native | island) #to test whether there are differences between native & not native given that you are on Guam or Saipan
 natisl
 
 ## 8.3: Confidence intervals --------
@@ -187,7 +187,8 @@ confint(webmod3) #Intercept is guam. The coefficient for Saipan has confidence i
 ## 8.4: Classic model comparison with Likelihood Ratio Tests --------
 #Best fitting model was: 
 webmod3 <- lm(websize ~ island, data = transplant)
-# see section 6.3.1 above.  
+# see section 6.2.3 above.  
+# interpretation of results: Can state whether a factor is significant predictor in the model depending on whether it is included in the best fitting model. Can use confint or post-hoc tests if needed to interpret differences between levels. 
 
 ## 8.5: Information Theoretic approach ------------
 # From 6.2.4 - 

@@ -1,79 +1,78 @@
-###########
-# Introduction to ggplot2
+# Introduction to ggplot2 ---------
 # Author: Haldre Rogers
-# last updated 12 November 2019 
+# last updated 10 November 2021
 
-#### References ######
-# Super useful cheatsheet: https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf 
-# Inspired by several websites, including: http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html#org9900582 
+# References/Resources --------
+# Super useful cheatsheet: https://raw.githubusercontent.com/rstudio/cheatsheets/main/data-visualization.pdf 
+# Inspired by several websites, including: https://iqss.github.io/dss-workshops/Rgraphics.html  
 # http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/
 # 
 # Other resources
 # http://www.r-graph-gallery.com/ 
 # http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html check out this website for a whole bunch of ideas & code for graphs
 
-############
-library(tidyverse)
-library(ggplot2)
-library(ggthemes)
-library(lme4)
+# Load Libraries --------
+library(tidyverse) #includes ggplot2
+library(ggthemes) #may need to install this
+library(lme4) #for mixed effects models at the end
 
-##############################
-
-#Read in seed data and location of seed traps.  
+# 1. Load Data -------
+# Read in seed data and location of seed traps.  
 pstraps<-read.csv("data/tidy/pstraps.csv", header=TRUE)
 
-#Dataset is to examine the proportion of seeds that are handled relative to distance from the nearest conspecific. This does not include traps that caught 0 seeds, or traps on Guam
+# Dataset is to examine the proportion of seeds that are handled relative to distance from the nearest conspecific. This does not include traps that caught 0 seeds, or traps on Guam
 
-#check out the dataframe
+# 2. Explore data and identify key variables ---------
 str(pstraps)
 summary(pstraps)
 
-#'handled' seeds and 'total' seeds (ignore unhandled)
-#create proportion column using these two variables
+# Response Variable: 'handled' seeds and 'total' seeds (ignore unhandled)
+# create proportion column using these two variables
 pstraps$prop<-as.numeric(pstraps$handled/pstraps$total) 
 summary(pstraps$prop)
 
-#predictors
-#island (factor), mindist (distance from nearest conspecific, numeric)
+# Predictor variables: 
+# island (factor), mindist (distance from nearest conspecific, numeric)
 
-#other things that might be important
-#site (factor)
+# Other things that might be important
+# site (factor)
 
-#########################################
-#1 Geometric Objects
+# 3. Geoms: Using Geometric Objects to display data ---------
 
-#1a) plot just a single variable
-#continuous x
+## 3.1: Histogram: plot just a single variable -------
+# continuous x
 ggplot(pstraps, aes(prop)) +
   geom_histogram() #default stat for geom_histogram is "bin"
 
 ggplot(pstraps, aes(prop)) +
   geom_histogram(stat = "bin", bins = 5)
 
-#categorical x
+# categorical x
 ggplot(pstraps, aes(island))+
   geom_bar(stat = "count") #default stat for geom_bar is count. Count takes a count of the number of cases, need categorical x variable, and no y-variable. 
 
-#1b) plot x and y variables
+## 3.2: Boxplot and Violin plot  -------
 ggplot(data = pstraps, aes(x = island,y = prop)) +
-  geom_boxplot()
+  geom_boxplot() #graphs the extreme of the lower whisker, the lower hinge, the median, the upper hinge and the extreme of the upper whisker. The lower and upper hinges correspond to the first and third quartiles (the 25th and 75th percentiles). The upper whisker extends from the hinge to the largest value no further than 1.5 * IQR from the hinge (where IQR is the inter-quartile range, or distance between the first and third quartiles). The lower whisker extends from the hinge to the smallest value at most 1.5 * IQR of the hinge. Data beyond the end of the whiskers are called "outlying" points and are plotted individually.
 
 ggplot(pstraps, aes(island, prop)) +
-  geom_violin()
+  geom_violin() #density boxplot
 
 p1 <- ggplot(data = pstraps, aes(x = island, y = prop)) +
   geom_boxplot()
 
 p1 + geom_violin() #add a second layer to p1 ggplot to compare violin and boxplots
 
+## 3.3: Barplot ---------
 ggplot(data=pstraps, aes(x = island, y = handled))+
   geom_bar(stat = "identity") #stat="identity" produces a bar graph of values not counts. Need x and y variables for this. 
 #this website is useful http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_(ggplot2)/
 
+## 3.4: Scatterplot -------
 ggplot(data=pstraps, aes(x=mindist, y=prop))+
   geom_point()
 
+## 3.5: Line graph --------
 ggplot(pstraps, aes(mindist, prop))+
   geom_line() #not very useful. geom_line essentially connects the dots. 
 
@@ -81,7 +80,7 @@ ggplot(pstraps, aes(mindist, prop))+
 ggplot(economics, aes(date, unemploy)) + 
   geom_line()
 
-#1c) add vertical and horizontal lines
+## 3.6: Vertical and horizontal lines ---------
 ggplot(pstraps, aes(mindist, prop))+
   geom_point()+
   geom_hline(yintercept=0.5)+
@@ -90,9 +89,8 @@ ggplot(pstraps, aes(mindist, prop))+
 ggplot()+
   geom_hline(yintercept = 0.5) #shortest possible line of code for ggplot graph? 
 
-#########################################
-#2 Add prediction lines to graph
-#use model results
+# 4: Add prediction lines to graph --------
+## 4.1: Use model results ------
 m1 <- glm(cbind(handled, total-handled) ~ mindist, data = pstraps, family = binomial)
 pstraps$pred <- predict(m1, type = "response")
 
@@ -100,7 +98,7 @@ ggplot(pstraps, aes(mindist, prop)) +
   geom_point() +
   geom_line(aes(y = pred))
 
-#use stat_smooth
+## 4.2: Use stat_smooth ---------
 ggplot(pstraps, aes(mindist, prop)) +
   geom_point() +
   geom_smooth() #default method is loess, dark shaded band is +/- confidence intervals. Note that these confidence intervals go above 1, which is impossible. 
@@ -108,37 +106,35 @@ ggplot(pstraps, aes(mindist, prop)) +
 ggplot(pstraps, aes(mindist, prop)) +
   geom_point() +
   geom_smooth(method = "glm", method.args=list(family = "binomial")) 
-#I'd use predict approach above- this is to show you the geom_smooth option. 
 
-###### Add error bars to graph ##############
-#Option 1- based on raw data
-#First need to calculate error and create new dataframe
+# I'd use predict approach above- this is to show you the geom_smooth option. 
+
+# 5: Add error bars to graph ---------
+## 5.1: Add error bars based on error calculated from raw data --------
+# First need to calculate error and create new dataframe. Note, this assumes normality. 
 sumpstraps <- pstraps %>%
   group_by(island) %>%
-  summarise(N = length(total), mean = mean(total), sd   = sd(total), se   = sd / sqrt(N))
-
-sumpstraps <-ddply(pstraps, c("island"), summarise,
-       N = length(total),
-       mean = mean(total),
-       sd   = sd(total),
-       se   = sd / sqrt(N))
+  summarise(N = length(total), 
+            mean = mean(total), 
+            sd   = sd(total), 
+            se   = sd / sqrt(N))
 
 ggplot(sumpstraps, aes(island, mean))+
-  geom_point(stat="identity")+
-  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=0.2)
+  geom_point(stat = "identity")+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.2)
 
-
-#####Option 2- based on model output#####
+## 5.2: Add error bars based on error from model output -------
 m1 <- glm(total ~ island, data = pstraps, family=poisson) #poisson uses a log link
 
-#create dataframe over which to predict model results
-preddata <- with(pstraps, expand.grid(island = levels(island)))
+# create dataframe over which to predict model results
+island <- c("rota","tinian", "saipan")
+preddata <- as.data.frame(island)
 
-#predict model results
-preddata2 <- as.data.frame(predict(m1, newdata=preddata, type="link", se.fit=TRUE))
-preddata2<-cbind(preddata, preddata2)
+# predict model results
+preddata2 <- as.data.frame(predict(m1, newdata = preddata, type = "link", se.fit = TRUE))
+preddata2 <- cbind(preddata, preddata2)
 
-#calculate upper and lower CI's
+# calculate upper and lower CI's
 preddata2 <- within(preddata2, {
   pred <- exp(fit)
   lwr <- exp(fit - (1.96 * se.fit))
@@ -152,40 +148,44 @@ ggplot(preddata2, aes(island, pred))+
 #Look here for similar code for binomial model
 #http://stats.idre.ucla.edu/r/dae/logit-regression/ 
 
-#########################################
-#3 - change qualities of the points & lines
-ggplot(pstraps, aes(mindist, prop, color=island))+
+# 6: Aesthetics: Add/adjust points & lines ---------
+
+## 6.1: add another variable distinguished by color -----
+ggplot(pstraps, aes(mindist, prop, color = island)) +
   geom_point()
 
-ggplot(pstraps, aes(mindist, prop, shape=island))+
+## 6.2: add another variable distinguished by shape -----
+ggplot(pstraps, aes(mindist, prop, shape = island)) +
   geom_point()
 
+ggplot(pstraps, aes(mindist, prop)) +
+  geom_point(aes(shape = island)) #same as above- this is useful if you have several geoms on a graph, and want different aesthetics for each. 
+
+## 6.3: Add two variables, one distinguished by color, another by pointsize -----
+ggplot(pstraps, aes(mindist, prop, color = island, size = total)) +
+  geom_point()
+
+## 6.4: create labels instead of points -------
 ggplot(pstraps, aes(mindist, prop))+
-  geom_point(aes(shape=island)) #same as above- this is useful if you have several geoms on a graph, and want different aesthetics for each. 
+  geom_text(aes(label = island), size = 3) #not super useful here, but you can see how this might be helpful
 
-ggplot(pstraps, aes(mindist, prop, color=island, size=total))+
-  geom_point()
-
-ggplot(pstraps, aes(mindist, prop))+
-  geom_text(aes(label=island), size = 3) #not super useful here, but you can see how this might be helpful
-
-#change formula to include island
-pstraps$pred <- predict(glm(cbind(handled, total-handled) ~ mindist*island, data = pstraps, family=binomial), type = "response")
+## 6.5: Create graphic with color, point size, and model fit line ----
+# first change formula to include island and get predicted values
+pstraps$pred <- predict(glm(cbind(handled, total - handled) ~ mindist * island, data = pstraps, family = binomial), type = "response")
 
 ggplot(pstraps, aes(mindist, prop, color = island)) +
   geom_point(aes(size = total))+
   geom_line(aes(y = pred))
 
-#########################################
-#4) Scales - Controlling Aesthetic Mapping
-#Scales adjust the aesthetics we specified above. Can adjust position (e.g. jitter), color, fill, shape, size, linetype here, and then add labels, and change titles, and change breaks in x- and y-axis, as well as limits for x- and y-axes. 
+# 7: Scales - Controlling Aesthetic Mapping -------
+# Scales adjust the aesthetics we specified above. Can adjust position (e.g. jitter), color, fill, shape, size, linetype here, and then add labels, and change titles, and change breaks in x- and y-axis, as well as limits for x- and y-axes. 
 
-#general function formula is scale_<aesthetic>_<type>, where <aesthetic> is replaced by color, shape, size, y, x etc. and <type> is replaced by continuous, manual, discrete etc. 
-#Options include: scale_color_<type>, scale_fill_<type>, scale_size_<type>, scale_shape_<type>, scale_linetype_<type>, scale_x_<type>, scale_y_<type>. 
+# general function formula is scale_<aesthetic>_<type>, where <aesthetic> is replaced by color, shape, size, y, x etc. and <type> is replaced by continuous, manual, discrete etc. 
+# Options include: scale_color_<type>, scale_fill_<type>, scale_size_<type>, scale_shape_<type>, scale_linetype_<type>, scale_x_<type>, scale_y_<type>. 
 
-#this website has a useful table for the options here: http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html#org9900582 
-#I'm going to use these colors. 
-#Check out http://colorbrewer2.org/ for color scheme ideas
+# this website has a useful table for the options here: http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html#org9900582 
+# I'm going to use these colors. 
+# Check out http://colorbrewer2.org/ for color scheme ideas
 group.colors <- c("saipan"="#E69F00", "tinian"="#D55E00FF", "rota"="#F0E442")
 
 ggplot(pstraps, aes(mindist, prop, color=island))+
@@ -201,8 +201,8 @@ ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point()+
   scale_color_brewer(palette = "Blues") #use color brewer to choose colors
 
-#########################################
-#5) multiple plots from same dataset- faceting
+
+# 8: Faceting: Create multiple plots from same dataset --------
 
 ggplot(pstraps, aes(mindist, prop))+
   geom_point()+
@@ -224,10 +224,10 @@ ggplot(pstraps, aes(mindist, prop))+
   geom_point()+
   facet_grid(.~island, scales="free_x") #can let each panel have it's own x or y axes
 
-##########################################
-#6) themes. This is where you adjust non-data plot elements such as axis labels, plot background, facet label backround, legend appearance
+# 9:Themes - work with axis labels, backgrounds, text size, etc. ------
+# This is where you adjust non-data plot elements such as axis labels, plot background, facet label backround, legend appearance
 
-#built-in themes
+# built-in themes
 
 ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point(aes(size=total))+
@@ -244,15 +244,15 @@ ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_line(aes(y=pred))+
   theme_minimal()
 
-#try theme_grey, theme_linedraw, theme_light, theme_fivethirtyeight, theme_economist, theme_few, theme_wsj, theme_tufte
+# try theme_grey, theme_linedraw, theme_light, theme_fivethirtyeight, theme_economist, theme_few, theme_wsj, theme_tufte
 
-#To change font of all elements of the theme at the same time, use theme_classic(base_size = 12) (can use any specialized theme for this)
+# To change font of all elements of the theme at the same time, use theme_classic(base_size = 12) (can use any specialized theme for this)
 ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point(aes(size=total))+
   geom_line(aes(y=pred))+
   theme_classic(base_size = 10)
 
-#you can adjust aspects of the theme manually
+# you can adjust aspects of the theme manually
 ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point(aes(size=total))+
   geom_line(aes(y=pred))+
@@ -274,9 +274,7 @@ ggplot(pstraps, aes(mindist, prop, color=island))+
 
 #you can also save your own theme.  
 #See here: http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html#org01640c8 
-
-##########################################
-#6) Saving graphs.
+# 10: Saving graphs -------
 mindist_graph<-ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point(aes(size=total))+
   geom_line(aes(y=pred))
@@ -285,8 +283,8 @@ ggsave("mindist.pdf", width=4, height=4, units="in")
 
 ggsave("mindist.png", width=4, height=4, units="in")
 
-#7) Putting multiple graphs on same figure
-#egg, #cowplot, and #gridExtra are packages that are helpful for this
+# 11: Put multiple graphs on same figure --------
+# egg, cowplot, and gridExtra are packages that are helpful for this
 library(egg)
 ggarrange(mindist_graph, p1)
 
