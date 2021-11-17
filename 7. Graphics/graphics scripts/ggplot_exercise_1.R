@@ -1,11 +1,10 @@
-#ggplot exercise Day 1
+#ggplot Exercise 
 #EEOB590
 
 #We will use the forest trajectory dataset to make some graphs. These are from 25m transects conducted across three islands within 4 different forest types. We measured a bunch of things along each transect, so the dataframe is relatively complex. Be sure to use the ggplot_tutorial.R script to help you with this exercise. 
 
 #Load libraries
 library(tidyverse)
-library(ggplot2)
 library(ggthemes)
 
 #Load data

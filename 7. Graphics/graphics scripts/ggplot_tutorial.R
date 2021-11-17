@@ -7,8 +7,8 @@
 # Inspired by several websites, including: https://iqss.github.io/dss-workshops/Rgraphics.html  
 # http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/
 # 
-# Other resources
-# http://www.r-graph-gallery.com/ 
+# Other resources for seeing different types of graphs
+# http://www.r-graph-gallery.com/ #not only ggplot
 # http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html check out this website for a whole bunch of ideas & code for graphs
 
 # Load Libraries --------
@@ -28,7 +28,7 @@ summary(pstraps)
 
 # Response Variable: 'handled' seeds and 'total' seeds (ignore unhandled)
 # create proportion column using these two variables
-pstraps$prop<-as.numeric(pstraps$handled/pstraps$total) 
+pstraps$prop <- as.numeric(pstraps$handled/pstraps$total) 
 summary(pstraps$prop)
 
 # Predictor variables: 
@@ -48,7 +48,7 @@ ggplot(pstraps, aes(prop)) +
   geom_histogram(stat = "bin", bins = 5)
 
 # categorical x
-ggplot(pstraps, aes(island))+
+ggplot(data = pstraps, aes(island)) +
   geom_bar(stat = "count") #default stat for geom_bar is count. Count takes a count of the number of cases, need categorical x variable, and no y-variable. 
 
 ## 3.2: Boxplot and Violin plot  -------
@@ -64,16 +64,16 @@ p1 <- ggplot(data = pstraps, aes(x = island, y = prop)) +
 p1 + geom_violin() #add a second layer to p1 ggplot to compare violin and boxplots
 
 ## 3.3: Barplot ---------
-ggplot(data=pstraps, aes(x = island, y = handled))+
+ggplot(data = pstraps, aes(x = island, y = handled))+
   geom_bar(stat = "identity") #stat="identity" produces a bar graph of values not counts. Need x and y variables for this. 
 #this website is useful http://www.cookbook-r.com/Graphs/Bar_and_line_graphs_(ggplot2)/
 
 ## 3.4: Scatterplot -------
-ggplot(data=pstraps, aes(x=mindist, y=prop))+
+ggplot(data = pstraps, aes(x = mindist, y = prop)) +
   geom_point()
 
 ## 3.5: Line graph --------
-ggplot(pstraps, aes(mindist, prop))+
+ggplot(pstraps, aes(mindist, prop)) +
   geom_line() #not very useful. geom_line essentially connects the dots. 
 
 #here's an example that shows where geom_line is useful
@@ -83,8 +83,8 @@ ggplot(economics, aes(date, unemploy)) +
 ## 3.6: Vertical and horizontal lines ---------
 ggplot(pstraps, aes(mindist, prop))+
   geom_point()+
-  geom_hline(yintercept=0.5)+
-  geom_vline(xintercept=4)
+  geom_hline(yintercept = 0.5) +
+  geom_vline(xintercept = 4)
 
 ggplot()+
   geom_hline(yintercept = 0.5) #shortest possible line of code for ggplot graph? 
@@ -105,8 +105,7 @@ ggplot(pstraps, aes(mindist, prop)) +
 
 ggplot(pstraps, aes(mindist, prop)) +
   geom_point() +
-  geom_smooth(method = "glm", method.args=list(family = "binomial")) 
-
+  geom_smooth(method = "glm", method.args = list(family = "binomial")) 
 # I'd use predict approach above- this is to show you the geom_smooth option. 
 
 # 5: Add error bars to graph ---------
@@ -124,7 +123,7 @@ ggplot(sumpstraps, aes(island, mean))+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.2)
 
 ## 5.2: Add error bars based on error from model output -------
-m1 <- glm(total ~ island, data = pstraps, family=poisson) #poisson uses a log link
+m1 <- glm(total ~ island, data = pstraps, family = poisson) #poisson uses a log link
 
 # create dataframe over which to predict model results
 island <- c("rota","tinian", "saipan")
@@ -141,9 +140,9 @@ preddata2 <- within(preddata2, {
   upr <- exp(fit + (1.96 * se.fit))
 })
 
-ggplot(preddata2, aes(island, pred))+
+ggplot(preddata2, aes(island, pred)) +
   geom_point()+
-  geom_errorbar(aes(ymin=lwr, ymax=upr), width=0.2)
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.2)
 
 #Look here for similar code for binomial model
 #http://stats.idre.ucla.edu/r/dae/logit-regression/ 
@@ -180,10 +179,30 @@ ggplot(pstraps, aes(mindist, prop, color = island)) +
 # 7: Scales - Controlling Aesthetic Mapping -------
 # Scales adjust the aesthetics we specified above. Can adjust position (e.g. jitter), color, fill, shape, size, linetype here, and then add labels, and change titles, and change breaks in x- and y-axis, as well as limits for x- and y-axes. 
 
-# general function formula is scale_<aesthetic>_<type>, where <aesthetic> is replaced by color, shape, size, y, x etc. and <type> is replaced by continuous, manual, discrete etc. 
+# Every aesthetic in a plot is associated with exactly one scale. When you run this code: 
+ggplot(pstraps, aes(mindist, prop)) +
+  geom_point(aes(color = island))
+
+# ggplot2 adds a default scale for each aesthetic used in the plot:
+  ggplot(pstraps, aes(mindist, prop)) + 
+  geom_point(aes(color = island)) +
+  scale_x_continuous() + 
+  scale_y_continuous() + 
+  scale_color_discrete()
+
+# The general function formula is scale_<aesthetic>_<type>
+# <aesthetic> is replaced by color, shape, size, y, x etc. 
+# <type> is replaced by continuous, manual, discrete etc. 
 # Options include: scale_color_<type>, scale_fill_<type>, scale_size_<type>, scale_shape_<type>, scale_linetype_<type>, scale_x_<type>, scale_y_<type>. 
 
-# this website has a useful table for the options here: http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html#org9900582 
+# the common arguments in scale are 
+  # name: the axis or legend title
+  # limits: the minimum and maximum of the scale
+  # breaks: the points along the scale where labels should appear
+  # labels: the labels that appear at each break
+
+# this website has a useful table for the options here: https://iqss.github.io/dss-workshops/Rgraphics.html#scales  
+  
 # I'm going to use these colors. 
 # Check out http://colorbrewer2.org/ for color scheme ideas
 group.colors <- c("saipan"="#E69F00", "tinian"="#D55E00FF", "rota"="#F0E442")
@@ -199,8 +218,14 @@ ggplot(pstraps, aes(mindist, prop, color=island))+
 
 ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point()+
-  scale_color_brewer(palette = "Blues") #use color brewer to choose colors
+  scale_color_brewer(palette = "Blues") #use color brewer to choose colors; can use a bunch of different palettes (see help). 
+ggplot(pstraps, aes(mindist, prop, color=island))+
+  geom_point()+
+  scale_color_brewer(type = "div", palette = 6) #diverging colors. try "seq", and "qual" for sequential or qualitative
 
+ggplot(pstraps, aes(mindist, prop, color=island))+
+  geom_point()+
+  scale_colour_colorblind() # colorblind friendly palette
 
 # 8: Faceting: Create multiple plots from same dataset --------
 
@@ -274,7 +299,13 @@ ggplot(pstraps, aes(mindist, prop, color=island))+
 
 #you can also save your own theme.  
 #See here: http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html#org01640c8 
+
 # 10: Saving graphs -------
+# have to choose the format. Options include "png", "eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" or "wmf" 
+# For publication-ready images, you should generate via vector-based transformations (SVG, PDF, etc) and not pixel-based (BMP, JPEG, TIFF, PNG, etc). 
+# Most journals require 300 ppi images in PDF, EPS, PNG, or TIFF format
+# eps and pdf are good for editing figures in Adobe Illustrator
+
 mindist_graph<-ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point(aes(size=total))+
   geom_line(aes(y=pred))
