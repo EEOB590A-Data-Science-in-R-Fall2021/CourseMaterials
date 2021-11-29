@@ -125,9 +125,13 @@ ggplot(sumpstraps, aes(island, mean))+
 ## 5.2: Add error bars based on error from model output -------
 m1 <- glm(total ~ island, data = pstraps, family = poisson) #poisson uses a log link
 
-# create dataframe over which to predict model results
+# create dataframe over which to predict model results. 
+# Option 1: 
 island <- c("rota","tinian", "saipan")
 preddata <- as.data.frame(island)
+
+# Option 2
+preddata <- with(pstraps, expand.grid(island = levels(as.factor(island)))) #this option is useful if you need combinations of multiple factors
 
 # predict model results
 preddata2 <- as.data.frame(predict(m1, newdata = preddata, type = "link", se.fit = TRUE))
@@ -209,19 +213,20 @@ group.colors <- c("saipan"="#E69F00", "tinian"="#D55E00FF", "rota"="#F0E442")
 
 ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point()+
-  scale_color_manual(name="Island", breaks=c("rota", "saipan", "tinian"), labels=c("Rota", "Saipan", "Tinian"), values= group.colors)
+  scale_color_manual(name = "Island", breaks = c("rota", "saipan", "tinian"), labels = c("Rota", "Saipan", "Tinian"), values = group.colors)
 
 ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point()+
-  scale_y_continuous(limits=c(0,1), "Proportion seeds without flesh") +
-  scale_x_continuous(limits=c(0,20), "Distance to nearest conspecific (m)")
+  scale_y_continuous(limits = c(0,1), "Proportion seeds without flesh") +
+  scale_x_continuous(limits = c(0,20), "Distance to \nnearest conspecific (m)")
 
 ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point()+
   scale_color_brewer(palette = "Blues") #use color brewer to choose colors; can use a bunch of different palettes (see help). 
+
 ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point()+
-  scale_color_brewer(type = "div", palette = 6) #diverging colors. try "seq", and "qual" for sequential or qualitative
+  scale_color_brewer(type = "div", palette = 3) #diverging colors. try "seq", and "qual" for sequential or qualitative
 
 ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point()+
@@ -237,20 +242,20 @@ ggplot(pstraps, aes(mindist, prop))+
   geom_point()+
   facet_grid(.~island)
 
-ggplot(pstraps, aes(mindist, prop))+
+ggplot(pstraps, aes(mindist, prop)) +
   geom_point()+
-  facet_grid(island~.)
+  facet_grid(island ~ .)
+
+ggplot(pstraps, aes(mindist, prop)) +
+  geom_point()+
+  facet_grid(island ~ trap) #not super useful, but you can see how a different factor might be. 
 
 ggplot(pstraps, aes(mindist, prop))+
   geom_point()+
-  facet_grid(island~trap) #not super useful, but you can see how a different factor might be. 
-
-ggplot(pstraps, aes(mindist, prop))+
-  geom_point()+
-  facet_grid(.~island, scales="free_x") #can let each panel have it's own x or y axes
+  facet_grid(. ~ island, scales = "free_x") #can let each panel have it's own x or y axes
 
 # 9:Themes - work with axis labels, backgrounds, text size, etc. ------
-# This is where you adjust non-data plot elements such as axis labels, plot background, facet label backround, legend appearance
+# This is where you adjust non-data plot elements such as axis labels, plot background, facet label background, legend appearance
 
 # built-in themes
 
@@ -269,7 +274,7 @@ ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_line(aes(y=pred))+
   theme_minimal()
 
-# try theme_grey, theme_linedraw, theme_light, theme_fivethirtyeight, theme_economist, theme_few, theme_wsj, theme_tufte
+# try theme_grey, theme_linedraw, theme_light, theme_fivethirtyeight, theme_economist, theme_few, theme_wsj, theme_tufte, theme_pander
 
 # To change font of all elements of the theme at the same time, use theme_classic(base_size = 12) (can use any specialized theme for this)
 ggplot(pstraps, aes(mindist, prop, color=island))+
@@ -282,35 +287,36 @@ ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point(aes(size=total))+
   geom_line(aes(y=pred))+
   theme_bw()+
-  theme(axis.text.x=element_text(size=9),
-        axis.text.y=element_text(size=9),
-        axis.title.y=element_text(size=9, face="bold"),
-        axis.title.x=element_text(size=9),
-        axis.line=element_line(),
+  theme(axis.text.x = element_text(size=9),
+        axis.text.y = element_text(size=9),
+        axis.title.y = element_text(size=9, face="bold"),
+        axis.title.x = element_text(size=9),
+        axis.line = element_line(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank(),
-        legend.position=c(0.83,0.5),
+        legend.position = c(0.83,0.5),
         legend.box.just = "left",
         legend.justification = "left",
         legend.key = element_blank(),
         plot.margin = unit(c(1,4,1,1), units="lines"))
 
 #you can also save your own theme.  
-#See here: http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html#org01640c8 
+#See here:  
+# https://iqss.github.io/dss-workshops/Rgraphics.html
 
 # 10: Saving graphs -------
-# have to choose the format. Options include "png", "eps", "ps", "tex", "pdf", "jpeg", "tiff", "png", "bmp", "svg" or "wmf" 
+# have to choose the format. Options include "png", "eps", "ps", "tex", "pdf", "jpeg", "tiff", "bmp", "svg" or "wmf" 
 # For publication-ready images, you should generate via vector-based transformations (SVG, PDF, etc) and not pixel-based (BMP, JPEG, TIFF, PNG, etc). 
 # Most journals require 300 ppi images in PDF, EPS, PNG, or TIFF format
 # eps and pdf are good for editing figures in Adobe Illustrator
 
-mindist_graph<-ggplot(pstraps, aes(mindist, prop, color=island))+
+mindist_graph <- ggplot(pstraps, aes(mindist, prop, color=island))+
   geom_point(aes(size=total))+
   geom_line(aes(y=pred))
 
-ggsave("mindist.pdf", width=4, height=4, units="in")
+ggsave("7. Graphics/graphics/mindist.pdf", plot = mindist_graph, width = 4, height = 4, units = "in", dpi = 300)
 
 ggsave("mindist.png", width=4, height=4, units="in")
 
@@ -329,33 +335,33 @@ grid.arrange(mindist_graph, p1)
 ######## Other stuff #####################
 
 #Plot model results from mixed effects model
-model1ps<-glmer(cbind(handled, total-handled)~island+(1|site), family=binomial, data=pstraps) 
+model1ps <- glmer(cbind(handled, total - handled) ~ island + (1|site), family = binomial, data = pstraps) 
 
 #need inverse logit function
-invlogit<-function(x){exp(x)/(1+exp(x))}
+invlogit <- function(x){exp(x)/(1+exp(x))}
 
 ###Graph it
 #### Confidence intervals are from http://glmm.wikidot.com/faq and from this code: http://glmm.wdfiles.com/local--files/examples/Owls.R
 
 #Get predicted value and upper and lower confidence intervals
 #conset up prediction frame
-preddata <- with(pstraps, expand.grid(island = levels(island)))
+preddata <- with(pstraps, expand.grid(island = levels(as.factor(island))))
 
 ## construct model matrix
-mm <- model.matrix(~island,data=preddata)
+mm <- model.matrix(~island,data = preddata)
 
 ## predictions from each model; first construct linear
 ##  predictor, then transform to raw scale
-pframe2 <- data.frame(preddata,eta=mm%*%fixef(model1ps))
-pframe2 <- with(pframe2,data.frame(pframe2,prop=invlogit(eta)))
-pvar1 <- diag(mm %*% tcrossprod(vcov(model1ps),mm))
-tvar1 <- pvar1+VarCorr(model1ps)$site  ## must be adapted for more complex models
+pframe2 <- data.frame(preddata,eta = mm %*% fixef(model1ps))
+pframe2 <- with(pframe2,data.frame(pframe2,prop = invlogit(eta)))
+pvar1 <- diag(mm %*% tcrossprod(vcov(model1ps), mm))
+tvar1 <- pvar1 + VarCorr(model1ps)$site  ## must be adapted for more complex models
 pframe2 <- data.frame(
   pframe2
-  , plo = invlogit(pframe2$eta-2*sqrt(pvar1))
-  , phi = invlogit(pframe2$eta+2*sqrt(pvar1))
-  , tlo = invlogit(pframe2$eta-2*sqrt(tvar1))
-  , thi = invlogit(pframe2$eta+2*sqrt(tvar1))
+  , plo = invlogit(pframe2$eta-2 * sqrt(pvar1))
+  , phi = invlogit(pframe2$eta + 2 * sqrt(pvar1))
+  , tlo = invlogit(pframe2$eta - 2 * sqrt(tvar1))
+  , thi = invlogit(pframe2$eta + 2 * sqrt(tvar1))
 )
 
 #plot confidence intervals, based on fixed effects uncertainty only (plo and phi)
@@ -377,3 +383,4 @@ ggplot(pframe2, aes(x=island, y=prop))+
         panel.border = element_blank(),
         panel.background = element_blank(),
         plot.margin = unit(c(1,1,1,1), units="lines"))
+

@@ -10,7 +10,7 @@ library(ggthemes)
 #Load data
 foresttraj <- read.csv("data/tidy/foresttrajectory_site_tidy.csv")
 
-#1) Replicate the figure in the graphics folder called spprich.adult.pdf. 
+#1) Replicate the figure in the graphics folder called spprich.adult.pdf. Note that adult species richness is represented in the num.adult.spp column. 
 
 #2) Now, make a figure based on model output from the model below. The final figure should look like the one called num.adult.trees.pdf. Be sure to use the code in the ggplot_tutoria file for this. 
 
